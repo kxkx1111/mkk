@@ -5,7 +5,7 @@ body {
   display : flex;
   flex-direction : column;
   justify-content : center;
-  align-item - center;
+  align-item : center;
   color : red;
 h1 {
   color: white;
