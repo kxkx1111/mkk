@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Our Love Timeline</title>
+  <style>
+    :root{--bg:#0f172a;--card:#0b1220;--accent:#ff4d6d;--muted:#94a3b8;--glass:rgba(255,255,255,0.04)}
+    *{box-sizing:border-box}
+    body{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin:0;background:linear-gradient(180deg,#071126 0%, #081827 60%);color:#e6eef8;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .app{width:100%;max-width:920px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:18px;padding:20px;box-shadow:0 10px 40px rgba(2,6,23,0.8);position:relative;overflow:hidden;}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:16px;}
+    header{display:flex;align-items:center;gap:12px;justify-content:center;flex-direction:column;text-align:center;position:relative;z-index:2;}
+    h1{margin:0;font-size:28px;color:var(--accent);animation:heartPulse 1.5s infinite;}
+    .small{color:var(--muted);font-size:14px}
+    .card{background:var(--card);padding:16px;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,0.5);margin-top:12px;transition: transform 0.5s, box-shadow 0.5s;}
+    .card:hover{transform: translateY(-6px) scale(1.02);box-shadow:0 10px 30px rgba(255,77,109,0.4);}
+    .count{font-size:38px;font-weight:700;margin-top:12px;color:var(--accent);animation:fadeIn 2s ease forwards;}
+    .pill{background:rgba(255,255,255,0.02);padding:8px 12px;border-radius:999px;font-weight:700;margin:4px;display:inline-block}
+    .love-note{margin-top:8px}
+    .big-heart{font-size:56px;color:var(--accent);text-align:center;margin-top:20px;animation:heartbeat 1s infinite;}
+    input[type=date], input[type=text], textarea{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);background:var(--glass);color:inherit;transition: transform 0.3s;}
+    input[type=date]:focus, input[type=text]:focus, textarea:focus{transform: scale(1.02);}
+    input[type=file]{margin-top:8px}
+    button{cursor:pointer;border:0;padding:12px 16px;border-radius:12px;background:linear-gradient(90deg,var(--accent),#ff7aa9);color:white;font-weight:600;transition: transform 0.3s, box-shadow 0.3s;}
+    button:hover{transform: scale(1.05);box-shadow:0 8px 20px rgba(255,77,109,0.5);}
+    .memories{max-height:260px;overflow:auto;margin-top:8px}
+    .memory{padding:12px;border-radius:14px;margin-bottom:10px;background:linear-gradient(135deg, rgba(255,77,109,0.15), rgba(255,77,109,0.05));box-shadow:0 4px 12px rgba(0,0,0,0.3);transition: transform 0.3s;}
+    .memory:hover{transform: scale(1.02);}
+
+    /* Photo styling */
+    .photo-preview{width:250px; max-height:250px; object-fit:cover; border-radius:16px; margin-top:12px; transition: transform 1s, filter 1s, box-shadow 1s; cursor:pointer;}
+
+    /* Dialog overlay */
+    .photo-dialog{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.5s; z-index:1000;}
+    .photo-dialog.active{opacity:1;pointer-events:auto;}
+    .photo-dialog-content{background:var(--card);padding:20px;border-radius:16px;max-width:90%;max-height:80%;overflow:auto; color:#fff; animation:dialogFade 0.5s ease;}
+
+    /* Hover message */
+    .hover-message{position:absolute;background:var(--card);padding:10px 16px;border-radius:12px;top:50%;left:calc(50% + 140px);transform:translateY(-50%);font-size:18px;color:var(--accent);opacity:0;pointer-events:none;transition:opacity 0.5s, transform 0.5s, font-size 0.3s;}
+    .hover-message.active{opacity:1;transform:translateY(-50%) translateX(0);}
+
+    @keyframes heartPulse {0%,100%{transform: scale(1);}50%{transform: scale(1.1);}}
+    @keyframes heartbeat {0%,100%{transform: scale(1);}25%{transform: scale(1.1);}50%{transform: scale(1);}75%{transform: scale(1.1);}}
+    @keyframes fadeIn{0%{opacity:0;}100%{opacity:1;}}
+    @keyframes dialogFade{0%{opacity:0; transform:scale(0.95);}100%{opacity:1; transform:scale(1);}}
+
+    /* floating hearts */
+    .floating-heart{position:absolute;width:24px;height:24px;background:radial-gradient(circle, #ff4d6d, #ff7aa9);clip-path: polygon(50% 0%, 61% 12%, 75% 15%, 87% 25%, 88% 37%, 80% 50%, 50% 85%, 20% 50%, 12% 37%, 13% 25%, 25% 15%, 39% 12%);animation: floatUp linear infinite;opacity:0.8;}
+    @keyframes floatUp{0%{transform: translateY(0) scale(1);opacity:0.8;}50%{opacity:0.6;}100%{transform: translateY(-500px) scale(1.3);opacity:0;}}
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <header style="position:relative;">
+      <h1>❤️ Our Love Journey ❤️</h1>
+      <div class="small">Started on September 29, 2025</div>
+      <div id="topCountdown" class="count">—</div>
+      <input type="file" id="photoInput" accept="image/*">
+      <img id="photoPreview" class="photo-preview" src="" alt="Your love photo">
+      <div id="hoverMessage" class="hover-message">MYAT KO KO + SAW WIN PYAE</div>
+    </header>
+
+    <div class="grid">
+      <div>
+        <div class="card" id="memoryCard">
+          <label>Add a memory</label>
+          <input id="memTitle" placeholder="Short title (e.g., 'Movie night')">
+          <textarea id="memText" rows="3" placeholder="Write what you remember..."></textarea>
+          <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end">
+            <button id="addMem">Add memory</button>
+          </div>
+          <div class="memories" id="memList"></div>
+        </div>
+      </div>
+
+      <aside>
+        <div class="card">
+          <h3 style="margin:0">Love note</h3>
+          <textarea id="loveText" rows="6" class="love-note" placeholder="Type a romantic message..."></textarea>
+          <div style="display:flex;gap:8px;margin-top:8px;justify-content:space-between">
+            <button id="saveNote">Save note</button>
+            <button id="loadExample" style="background:transparent;color:var(--accent);border:1px solid rgba(255,255,255,0.03)">Use example</button>
+          </div>
+          <div style="margin-top:12px">
+            <div class="small">Preview</div>
+            <div class="memory" style="margin-top:8px"><div class="note" id="notePreview">—</div></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="big-heart">❤️</div>
+    <footer class="small" style="text-align:center;margin-top:12px">Made with ♥ for our love — all data is saved on this device.</footer>
+  </div>
+
+  <script>
+    const memTitle = document.querySelector('#memTitle');
+    const memText = document.querySelector('#memText');
+    const addMem = document.querySelector('#addMem');
+    const memList = document.querySelector('#memList');
+    const loveText = document.querySelector('#loveText');
+    const saveNote = document.querySelector('#saveNote');
+    const notePreview = document.querySelector('#notePreview');
+    const loadExample = document.querySelector('#loadExample');
+    const topCountdown = document.querySelector('#topCountdown');
+
+    const photoInput = document.querySelector('#photoInput');
+    const photoPreview = document.querySelector('#photoPreview');
+    const hoverMessage = document.querySelector('#hoverMessage');
+
+    const app = document.querySelector('#app');
+
+    const K_MEMS = 'anniversary_memories';
+    const K_NOTE = 'anniversary_love_note';
+    const startDate = new Date('2025-09-29');
+
+    function saveToStorage(k,v){ localStorage.setItem(k, JSON.stringify(v)) }
+    function loadFromStorage(k,fallback){ try{ const t=localStorage.getItem(k); return t? JSON.parse(t):fallback } catch(e){return fallback} }
+
+    function renderMems(){ const ms = loadFromStorage(K_MEMS, []); memList.innerHTML='';
+      if(ms.length===0){ memList.innerHTML='<div class="small">No memories yet — add one.</div>'; return}
+      ms.slice().reverse().forEach(m=>{
+        const el = document.createElement('div'); el.className='memory';
+        el.innerHTML = `<div style="font-weight:700">${escapeHtml(m.title)}</div><div class="small">${new Date(m.t).toLocaleString()}</div><div class="small" style="margin-top:4px">${escapeHtml(m.text)}</div>`;
+        memList.appendChild(el);
+      });
+    }
+
+    addMem.addEventListener('click',()=>{
+      const t=memTitle.value.trim()||'Memory'; const txt=memText.value.trim(); if(!txt){ alert('Write something!'); return}
+      const ms=loadFromStorage(K_MEMS,[]); ms.push({title:t,text:txt,t:new Date().toISOString()}); saveToStorage(K_MEMS,ms); memTitle.value=''; memText.value=''; renderMems();
+    });
+
+    saveNote.addEventListener('click',()=>{
+      const t=loveText.value.trim(); saveToStorage(K_NOTE,t); notePreview.textContent=t||'—';
+    });
+
+    loadExample.addEventListener('click',()=>{
+      loveText.value=`My love,\nSince September 29, 2025, every day with you has been magic. I love you!`; notePreview.textContent=loveText.value;
+    });
+
+    function renderNote(){ const t=loadFromStorage(K_NOTE,''); loveText.value=t; notePreview.textContent=t||'—'; }
+    function escapeHtml(s){ return (s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+
+    function calculateDiff(start, end){
+      const diffMs = end - start;
+      const diffDays = Math.floor(diffMs / (1000*60*60*24));
+      const years = end.getFullYear() - start.getFullYear();
+      const months = end.getMonth() - start.getMonth() + years*12;
+      return {years: years, months: months, days: diffDays};
+    }
+
+    function updateTopCountdown(){
+      const now = new Date();
+      const diff = calculateDiff(startDate, now);
+      topCountdown.textContent = `${diff.years} year(s), ${diff.months} month(s), ${diff.days} day(s) together`;
+    }
+
+    photoInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if(file){
+        const reader = new FileReader();
+        reader.onload = function(ev){
+          photoPreview.src = ev.target.result;
+          photoPreview.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Show hover message on photo
+    photoPreview.addEventListener('mouseenter', ()=>{
+      hoverMessage.classList.add('active');
+    });
+    photoPreview.addEventListener('mouseleave', ()=>{
+      hoverMessage.classList.remove('active');
+    });
+
+    // floating hearts dynamically
+    function createFloatingHeart(){
+      const heart = document.createElement('div');
+      heart.className = 'floating-heart';
+      heart.style.left = Math.random() * 100 + '%';
+      heart.style.animationDuration = 4 + Math.random() * 3 + 's';
+      app.appendChild(heart);
+      setTimeout(()=>{app.removeChild(heart);},7000);
+    }
+    setInterval(createFloatingHeart,500);
+
+    renderMems(); renderNote(); updateTopCountdown();
+    setInterval(updateTopCountdown,60000);
+  </script>
+</body>
+</html>
